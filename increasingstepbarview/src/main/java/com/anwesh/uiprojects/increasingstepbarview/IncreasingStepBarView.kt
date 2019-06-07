@@ -221,4 +221,12 @@ class IncreasingStepBarView(ctx : Context) : View(ctx) {
             }
         }
     }
+
+    companion object {
+        fun create(activity : Activity) : IncreasingStepBarView {
+            val view : IncreasingStepBarView = IncreasingStepBarView(activity)
+            activity.setContentView(view)
+            return view 
+        }
+    }
 }
