@@ -12,10 +12,11 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.RectF
 import android.content.Context
+import android.util.Log
 
 val nodes : Int = 5
 val rects : Int = 4
-val scGap : Float = 0f
+val scGap : Float = 0.05f
 val scDiv : Double = 0.51
 val strokeFactor : Int = 90
 val sizeFactor : Float = 2.9f
@@ -34,10 +35,10 @@ fun Float.updateValue(dir : Float, a : Int, b : Int) : Float {
     return mirrorValue(a, b) * dir * scGap
 }
 
-fun Canvas.drawStepBar(x : Float, i : Int, sc : Float, size : Float, paint : Paint) {
+fun Canvas.drawStepBar(x : Float, y : Float, size : Float, paint : Paint) {
     save()
     translate(x, 0f)
-    drawRect(RectF(0f, 0f, size, -i * size - size * sc), paint)
+    drawRect(RectF(0f, y, size, 0f), paint)
     restore()
 }
 
@@ -46,8 +47,9 @@ fun Canvas.drawISBNode(i : Int, scale : Float, paint : Paint) {
     val h : Float = height.toFloat()
     val gap : Float = h / (nodes + 1)
     val size : Float = gap / sizeFactor
-    var x : Float = 0f
     var barSize : Float = (2 * size) / (rects + 1)
+    var x : Float = 0f
+    var y : Float = -paint.strokeWidth / 2
     paint.style = Paint.Style.STROKE
     paint.color = foreColor
     paint.strokeWidth = Math.min(w, h) / strokeFactor
@@ -59,7 +61,8 @@ fun Canvas.drawISBNode(i : Int, scale : Float, paint : Paint) {
     for (j in 0..(rects - 1)) {
         val sc : Float = scale.divideScale(j, rects)
         x += barSize * sc.divideScale(0, 2)
-        drawStepBar(x, j, sc.divideScale(1, 2), size, paint)
+        y -= barSize * sc.divideScale(1, 2)
+        drawStepBar(x, y, barSize, paint)
     }
     restore()
     restore()
@@ -88,6 +91,7 @@ class IncreasingStepBarView(ctx : Context) : View(ctx) {
 
         fun update(cb : (Float) -> Unit) {
             scale += scale.updateValue(dir, rects, rects)
+            Log.d("scale:", "$scale")
             if (Math.abs(scale - prevScale) > 1) {
                 scale = prevScale + dir
                 dir = 0f
@@ -99,6 +103,7 @@ class IncreasingStepBarView(ctx : Context) : View(ctx) {
         fun startUpdating(cb : () -> Unit) {
             if (dir == 0f) {
                 dir = 1f - 2 * prevScale
+                Log.d("dir", "${dir}")
                 cb()
             }
         }
@@ -226,7 +231,7 @@ class IncreasingStepBarView(ctx : Context) : View(ctx) {
         fun create(activity : Activity) : IncreasingStepBarView {
             val view : IncreasingStepBarView = IncreasingStepBarView(activity)
             activity.setContentView(view)
-            return view 
+            return view
         }
     }
 }
