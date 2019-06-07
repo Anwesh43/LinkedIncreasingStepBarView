@@ -22,6 +22,8 @@ val strokeFactor : Int = 90
 val sizeFactor : Float = 2.9f
 val foreColor : Int = Color.parseColor("#311B92")
 val backColor : Int = Color.parseColor("#BDBDBD")
+val rotDeg : Float = 90f
+val delay : Long = 20
 
 fun Int.inverse() : Float = 1f / this
 fun Float.scaleFactor() : Float = Math.floor(this / scDiv).toFloat()
@@ -49,17 +51,20 @@ fun Canvas.drawISBNode(i : Int, scale : Float, paint : Paint) {
     val size : Float = gap / sizeFactor
     var barSize : Float = (2 * size) / (rects + 1)
     var x : Float = 0f
-    var y : Float = -paint.strokeWidth / 2
+    var y : Float = -barSize
+    val sc1 : Float = scale.divideScale(0, 2)
+    val sc2 : Float = scale.divideScale(1, 2)
     paint.style = Paint.Style.STROKE
     paint.color = foreColor
     paint.strokeWidth = Math.min(w, h) / strokeFactor
     paint.strokeCap = Paint.Cap.ROUND
     save()
     translate(w / 2, gap * (i + 1))
+    rotate(rotDeg * sc2)
     save()
-    translate(-size, -size)
+    translate(-size, size)
     for (j in 0..(rects - 1)) {
-        val sc : Float = scale.divideScale(j, rects)
+        val sc : Float = sc1.divideScale(j, rects)
         x += barSize * sc.divideScale(0, 2)
         y -= barSize * sc.divideScale(1, 2)
         drawStepBar(x, y, barSize, paint)
@@ -90,7 +95,7 @@ class IncreasingStepBarView(ctx : Context) : View(ctx) {
     data class State(var scale : Float = 0f, var dir : Float = 0f, var prevScale : Float = 0f) {
 
         fun update(cb : (Float) -> Unit) {
-            scale += scale.updateValue(dir, rects, rects)
+            scale += scale.updateValue(dir, rects * 2, 1)
             Log.d("scale:", "$scale")
             if (Math.abs(scale - prevScale) > 1) {
                 scale = prevScale + dir
@@ -115,7 +120,7 @@ class IncreasingStepBarView(ctx : Context) : View(ctx) {
             if (animated) {
                 cb()
                 try {
-                    Thread.sleep(50)
+                    Thread.sleep(delay)
                     view.invalidate()
                 } catch(ex : Exception) {
 
