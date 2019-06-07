@@ -171,4 +171,28 @@ class IncreasingStepBarView(ctx : Context) : View(ctx) {
             return this
         }
     }
+
+    data class IncreasingStepBar(var i : Int) {
+
+        private val root : ISBNode = ISBNode(0)
+        private var curr : ISBNode = root
+        private var dir : Int = 1
+
+        fun draw(canvas : Canvas, paint : Paint) {
+            root.draw(canvas, paint)
+        }
+
+        fun update(cb : (Int, Float) -> Unit) {
+            curr.update {i, scl ->
+                curr = curr.getNext(dir) {
+                    dir *= -1
+                }
+                cb(i, scl)
+            }
+        }
+
+        fun startUpdating(cb : () -> Unit) {
+            curr.startUpdating(cb)
+        }
+    }
 }
