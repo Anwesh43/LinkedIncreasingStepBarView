@@ -195,4 +195,26 @@ class IncreasingStepBarView(ctx : Context) : View(ctx) {
             curr.startUpdating(cb)
         }
     }
+
+    data class Renderer(var view : IncreasingStepBarView) {
+
+        private val animator : Animator = Animator(view)
+        private val isb : IncreasingStepBar = IncreasingStepBar(0)
+
+        fun render(canvas : Canvas, paint : Paint) {
+            canvas.drawColor(backColor)
+            isb.draw(canvas, paint)
+            animator.animate {
+                isb.update {i, scl ->
+                    animator.stop()
+                }
+            }
+        }
+
+        fun handleTap() {
+            isb.startUpdating {
+                animator.start()
+            }
+        }
+    }
 }
