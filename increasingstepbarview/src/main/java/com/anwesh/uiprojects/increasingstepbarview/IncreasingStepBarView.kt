@@ -14,7 +14,7 @@ import android.graphics.RectF
 import android.content.Context
 
 val nodes : Int = 5
-val rects : Int = 5
+val rects : Int = 4
 val scGap : Float = 0f
 val scDiv : Double = 0.51
 val strokeFactor : Int = 90
@@ -32,4 +32,35 @@ fun Float.mirrorValue(a : Int, b : Int) : Float {
 }
 fun Float.updateValue(dir : Float, a : Int, b : Int) : Float {
     return mirrorValue(a, b) * dir * scGap
+}
+
+fun Canvas.drawStepBar(x : Float, i : Int, sc : Float, size : Float, paint : Paint) {
+    save()
+    translate(x, 0f)
+    drawRect(RectF(0f, 0f, size, -i * size - size * sc), paint)
+    restore()
+}
+
+fun Canvas.drawISBNode(i : Int, scale : Float, paint : Paint) {
+    val w : Float = width.toFloat()
+    val h : Float = height.toFloat()
+    val gap : Float = h / (nodes + 1)
+    val size : Float = gap / sizeFactor
+    var x : Float = 0f
+    var barSize : Float = (2 * size) / (rects + 1)
+    paint.style = Paint.Style.STROKE
+    paint.color = foreColor
+    paint.strokeWidth = Math.min(w, h) / strokeFactor
+    paint.strokeCap = Paint.Cap.ROUND
+    save()
+    translate(w / 2, gap * (i + 1))
+    save()
+    translate(-size, -size)
+    for (j in 0..(rects - 1)) {
+        val sc : Float = scale.divideScale(j, rects)
+        x += barSize * sc.divideScale(0, 2)
+        drawStepBar(x, j, sc.divideScale(1, 2), size, paint)
+    }
+    restore()
+    restore()
 }
